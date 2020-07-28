@@ -69,6 +69,9 @@ class ViewController: UITableViewController {
     func submit(_ answer: String){
         let lowerAnswer = answer.lowercased()
         
+        let errorTitle: String
+        let errorMessage: String
+        
         if isPossible(lowerAnswer){
             if isOriginal(lowerAnswer){
                 if isReal(lowerAnswer){
@@ -77,10 +80,25 @@ class ViewController: UITableViewController {
                     let indexPath = IndexPath(row: 0, section: 0)
                     tableView.insertRows(at: [indexPath], with: .automatic)
                     
+                    return
+                    
+                } else {
+                    errorTitle = "Word not recognized"
+                    errorMessage = "You can't be making things up pal"
                 }
+            } else {
+                errorTitle = "Word already used"
+                errorMessage = "Be more original"
             }
+            
+        } else {
+            errorTitle = "That's not a word chief"
+            errorMessage = "You can't make a word from \(title!.lowercased())"
         }
         
+        let ac = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
         
     }
     
@@ -103,7 +121,10 @@ class ViewController: UITableViewController {
     }
     
     func isReal(_ word: String) -> Bool {
-        return true
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.utf16.count)
+        let misspelledWord = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+        return misspelledWord.location == NSNotFound
     }
 
 }
