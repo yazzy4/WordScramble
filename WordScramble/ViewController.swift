@@ -46,7 +46,7 @@ class ViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "word", for: indexPath)
-        cell.textLabel?.text = allWords[indexPath.row]
+        cell.textLabel?.text = usedWords[indexPath.row]
         return cell
     }
     
@@ -56,7 +56,7 @@ class ViewController: UITableViewController {
         
         let submitAction = UIAlertAction(title: "Submit", style: .default) {
             
-            [weak self, weak ac] action in
+            [weak self, weak ac] _ in
             guard let answer = ac?.textFields?[0].text else
             { return }
             self?.submit(answer)
@@ -85,11 +85,21 @@ class ViewController: UITableViewController {
     }
     
     func isPossible(_ word: String) -> Bool {
+//        if the temp word matches the title go to next block of code
+        guard var tempWord = title?.lowercased() else { return false }
+        
+        for letter in word {
+            if let position = tempWord.firstIndex(of: letter) {
+                tempWord.remove(at: position)
+            } else {
+                return false
+            }
+        }
         return true
     }
     
     func isOriginal(_ word: String) -> Bool {
-        return true
+        return !usedWords.contains(word)
     }
     
     func isReal(_ word: String) -> Bool {
