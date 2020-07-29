@@ -12,6 +12,7 @@ class ViewController: UITableViewController {
     
     var usedWords = [String]()
     var allWords = [String]()
+   
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -68,10 +69,7 @@ class ViewController: UITableViewController {
     
     func submit(_ answer: String){
         let lowerAnswer = answer.lowercased()
-        
-        let errorTitle: String
-        let errorMessage: String
-        
+       
         if isPossible(lowerAnswer){
             if isOriginal(lowerAnswer){
                 if isReal(lowerAnswer){
@@ -83,6 +81,30 @@ class ViewController: UITableViewController {
                     return
                     
                 } else {
+                    showErrorMessage(lowerAnswer)
+                }
+            } else {
+                showErrorMessage(lowerAnswer)
+            }
+            
+        } else {
+            showErrorMessage(lowerAnswer)
+        }
+        
+    }
+    
+    func showErrorMessage(_ answer: String) {
+        let lowerAnswer = answer.lowercased()
+        
+        let errorTitle: String
+        let errorMessage: String
+               
+        
+        if !isPossible(lowerAnswer){
+            if !isOriginal(lowerAnswer){
+                if !isReal(lowerAnswer){
+                    return
+                } else {
                     errorTitle = "Word not recognized"
                     errorMessage = "You can't be making things up pal"
                 }
@@ -90,16 +112,13 @@ class ViewController: UITableViewController {
                 errorTitle = "Word already used"
                 errorMessage = "Be more original"
             }
-            
         } else {
             errorTitle = "That's not a word chief"
-            errorMessage = "You can't make a word from \(title!.lowercased())"
+            errorMessage = "You can't make that word from \(title!.lowercased())"
         }
-        
         let ac = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: .alert)
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
-        
     }
     
     func isPossible(_ word: String) -> Bool {
