@@ -19,9 +19,10 @@ class ViewController: UITableViewController {
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(promptForAnswer))
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Start Game", style: .plain, target: self, action: #selector(startGame))
+        
         if let startWordUrl = Bundle.main.url(forResource: "start", withExtension: "txt") {
-            if let startWords = try? String(contentsOf: startWordUrl){
-                
+            if let startWords = try? String(contentsOf: startWordUrl) {
                 allWords = startWords.components(separatedBy: "\n")
             }
         }
@@ -34,7 +35,7 @@ class ViewController: UITableViewController {
     }
     
     
-    func startGame(){
+   @objc func startGame(){
         title = allWords.randomElement()
         usedWords.removeAll(keepingCapacity: true)
         tableView.reloadData()
@@ -69,60 +70,41 @@ class ViewController: UITableViewController {
     
     func submit(_ answer: String){
         let lowerAnswer = answer.lowercased()
-       
-        if isPossible(lowerAnswer){
-            if isOriginal(lowerAnswer){
+    
+        if isPossible(lowerAnswer) {
+            if isOriginal(lowerAnswer) {
                 if isReal(lowerAnswer){
                     usedWords.insert(answer, at: 0)
-                    
+                
                     let indexPath = IndexPath(row: 0, section: 0)
                     tableView.insertRows(at: [indexPath], with: .automatic)
                     
                     return
                     
                 } else {
-                    showErrorMessage(lowerAnswer)
+                    showErrorMessage("Word is either jibberish or 3 letter or less. Either way 🤷🏾‍♂️", title: "Word not recognized!")
                 }
             } else {
-                showErrorMessage(lowerAnswer)
+                showErrorMessage("Be more orginal", title: "Word already used!")
             }
             
         } else {
-            showErrorMessage(lowerAnswer)
+            showErrorMessage("You cannot use \(title!.lowercased()) to spell that word", title: "Invalid word!")
         }
         
     }
     
-    func showErrorMessage(_ answer: String) {
-        let lowerAnswer = answer.lowercased()
+    func showErrorMessage(_ errorMesssage: String, title: String) {
+        let ac = UIAlertController(title: title, message: errorMesssage, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Ok", style: .default))
         
-        let errorTitle: String
-        let errorMessage: String
-               
-        
-        if !isPossible(lowerAnswer){
-            if !isOriginal(lowerAnswer){
-                if !isReal(lowerAnswer){
-                    return
-                } else {
-                    errorTitle = "Word not recognized"
-                    errorMessage = "You can't be making things up pal"
-                }
-            } else {
-                errorTitle = "Word already used"
-                errorMessage = "Be more original"
-            }
-        } else {
-            errorTitle = "That's not a word chief"
-            errorMessage = "You can't make that word from \(title!.lowercased())"
-        }
-        let ac = UIAlertController(title: errorTitle, message: errorMessage, preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
+        
     }
     
     func isPossible(_ word: String) -> Bool {
 //        if the temp word matches the title go to next block of code
+        
         guard var tempWord = title?.lowercased() else { return false }
         
         for letter in word {
@@ -136,15 +118,21 @@ class ViewController: UITableViewController {
     }
     
     func isOriginal(_ word: String) -> Bool {
+        guard word != title else { return false }
+        
         return !usedWords.contains(word)
     }
     
     func isReal(_ word: String) -> Bool {
+        guard  word.count > 3 else { return false }
+        
         let checker = UITextChecker()
         let range = NSRange(location: 0, length: word.utf16.count)
         let misspelledWord = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
         return misspelledWord.location == NSNotFound
     }
+    
+    
 
 }
 
